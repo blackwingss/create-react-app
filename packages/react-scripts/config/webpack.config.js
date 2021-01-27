@@ -42,6 +42,12 @@ const postcssNormalize = require('postcss-normalize');
 // 自定义添加的插件
 const WebpackBar = require('webpackbar');
 
+const CompressionPlugin = require('compression-webpack-plugin');
+const isGzip = process.env.GENERATE_GZIP_FILE === 'true';
+
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const isBundleAnalyzer = process.env.GENERATE_BUNDLE_ANALYZER_REPORT === 'true';
+
 const appPackageJson = require(paths.appPackageJson);
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
@@ -75,6 +81,10 @@ const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
+
+// 匹配less文件的正则
+const lessRegex = /\.less$/;
+const lessModuleRegex = /\.module\.less$/;
 
 const hasJsxRuntime = (() => {
   if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
@@ -151,20 +161,36 @@ module.exports = function (webpackEnv) {
       },
     ].filter(Boolean);
     if (preProcessor) {
+      let preProcessorRule = {
+        loader: require.resolve(preProcessor),
+        options: {
+          sourceMap: true,
+        },
+      };
+      if (preProcessor === 'less-loader') {
+        preProcessorRule = {
+          loader: require.resolve(preProcessor),
+          options: {
+            sourceMap: true,
+            lessOptions: {
+              // 如果使用less-loader@5，需要移除 lessOptions 这一级
+              javascriptEnabled: true,
+              modifyVars: {
+                'primary-color': '#346fff', // 全局主色
+                'link-color': '#346fff', // 链接色
+              },
+            },
+          },
+        };
+      }
       loaders.push(
         {
           loader: require.resolve('resolve-url-loader'),
           options: {
-            sourceMap: isEnvProduction ? shouldUseSourceMap : isEnvDevelopment,
-            root: paths.appSrc,
+            sourceMap: isEnvProduction && shouldUseSourceMap,
           },
         },
-        {
-          loader: require.resolve(preProcessor),
-          options: {
-            sourceMap: true,
-          },
-        }
+        preProcessorRule
       );
     }
     return loaders;
@@ -346,6 +372,8 @@ module.exports = function (webpackEnv) {
           'scheduler/tracing': 'scheduler/tracing-profiling',
         }),
         ...(modules.webpackAliases || {}),
+        // 自定义alias
+        ['@']: path.resolve(__dirname, 'src'),
       },
       plugins: [
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
@@ -455,6 +483,15 @@ module.exports = function (webpackEnv) {
                   isEnvDevelopment &&
                     shouldUseReactRefresh &&
                     require.resolve('react-refresh/babel'),
+                  // 添加按需加载配置
+                  [
+                    'babel-plugin-import',
+                    {
+                      libraryName: 'antd',
+                      libraryDirectory: 'es',
+                      style: true,
+                    },
+                  ],
                 ].filter(Boolean),
                 // This is a feature of `babel-loader` for webpack (not Babel itself).
                 // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -576,6 +613,34 @@ module.exports = function (webpackEnv) {
                   },
                 },
                 'sass-loader'
+              ),
+            },
+            // 加上less-loader配置
+            {
+              test: lessRegex,
+              exclude: lessModuleRegex,
+              use: getStyleLoaders(
+                {
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                },
+                'less-loader'
+              ),
+              sideEffects: true,
+            },
+            // Adds support for CSS Modules, but using less
+            // using the extension .module.less
+            {
+              test: lessModuleRegex,
+              use: getStyleLoaders(
+                {
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                  modules: {
+                    getLocalIdent: getCSSModuleLocalIdent,
+                  },
+                },
+                'less-loader'
               ),
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.
@@ -779,9 +844,20 @@ module.exports = function (webpackEnv) {
           },
         },
       }),
+      // 启用内置webpack插件
       new webpack.ProgressPlugin(),
       // 自定义插件
       new WebpackBar(),
+      isEnvProduction &&
+        isGzip &&
+        new CompressionPlugin({
+          filename: '[path].gz[query]',
+          algorithm: 'gzip',
+          test: /\.js$|\.css$/,
+          threshold: 10240,
+          minRatio: 0.8,
+        }),
+      isEnvProduction && isBundleAnalyzer && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell webpack to provide empty mocks for them so importing them works.
