@@ -779,6 +779,7 @@ module.exports = function (webpackEnv) {
           },
         },
       }),
+      new webpack.ProgressPlugin(),
       // 自定义插件
       new WebpackBar(),
     ].filter(Boolean),
