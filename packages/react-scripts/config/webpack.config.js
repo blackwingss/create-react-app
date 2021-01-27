@@ -373,8 +373,6 @@ module.exports = function (webpackEnv) {
           'scheduler/tracing': 'scheduler/tracing-profiling',
         }),
         ...(modules.webpackAliases || {}),
-        // 自定义alias
-        ['@']: path.resolve(__dirname, 'src'),
       },
       plugins: [
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
@@ -845,8 +843,6 @@ module.exports = function (webpackEnv) {
           },
         },
       }),
-      // 启用内置webpack插件
-      new webpack.ProgressPlugin(),
       // 自定义插件
       new AntdDayjsWebpackPlugin(),
       new WebpackBar(),
@@ -859,7 +855,6 @@ module.exports = function (webpackEnv) {
           threshold: 10240,
           minRatio: 0.8,
         }),
-      // TODO
       isEnvProduction && isBundleAnalyzer && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
