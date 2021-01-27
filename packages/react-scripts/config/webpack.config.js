@@ -348,8 +348,6 @@ module.exports = function (webpackEnv) {
         ...(modules.webpackAliases || {}),
       },
       plugins: [
-        // 自定义插件
-        new WebpackBar(),
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
         // guards against forgotten dependencies and such.
         PnpWebpackPlugin,
@@ -781,6 +779,8 @@ module.exports = function (webpackEnv) {
           },
         },
       }),
+      // 自定义插件
+      new WebpackBar(),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell webpack to provide empty mocks for them so importing them works.
