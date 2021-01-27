@@ -39,6 +39,9 @@ const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
 const postcssNormalize = require('postcss-normalize');
 
+// 自定义添加的插件
+const WebpackBar = require('webpackbar');
+
 const appPackageJson = require(paths.appPackageJson);
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
@@ -357,6 +360,8 @@ module.exports = function (webpackEnv) {
           paths.appPackageJson,
           reactRefreshOverlayEntry,
         ]),
+        // 自定义插件
+        new WebpackBar(),
       ],
     },
     resolveLoader: {
