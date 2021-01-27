@@ -857,6 +857,7 @@ module.exports = function (webpackEnv) {
           threshold: 10240,
           minRatio: 0.8,
         }),
+      // TODO
       isEnvProduction && isBundleAnalyzer && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
