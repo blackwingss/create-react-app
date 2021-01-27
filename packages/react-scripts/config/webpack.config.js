@@ -41,6 +41,7 @@ const postcssNormalize = require('postcss-normalize');
 
 // 自定义添加的插件
 const WebpackBar = require('webpackbar');
+const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin');
 
 const CompressionPlugin = require('compression-webpack-plugin');
 const isGzip = process.env.GENERATE_GZIP_FILE === 'true';
@@ -847,6 +848,7 @@ module.exports = function (webpackEnv) {
       // 启用内置webpack插件
       new webpack.ProgressPlugin(),
       // 自定义插件
+      new AntdDayjsWebpackPlugin(),
       new WebpackBar(),
       isEnvProduction &&
         isGzip &&
