@@ -348,6 +348,9 @@ module.exports = function (webpackEnv) {
         ...(modules.webpackAliases || {}),
       },
       plugins: [
+        new webpack.ProgressPlugin(),
+        // 自定义插件
+        new WebpackBar(),
         // Adds support for installing with Plug'n'Play, leading to faster installs and adding
         // guards against forgotten dependencies and such.
         PnpWebpackPlugin,
@@ -360,8 +363,6 @@ module.exports = function (webpackEnv) {
           paths.appPackageJson,
           reactRefreshOverlayEntry,
         ]),
-        // 自定义插件
-        new WebpackBar(),
       ],
     },
     resolveLoader: {
