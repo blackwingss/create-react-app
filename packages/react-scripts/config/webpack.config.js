@@ -177,8 +177,8 @@ module.exports = function (webpackEnv) {
               // 如果使用less-loader@5，需要移除 lessOptions 这一级
               javascriptEnabled: true,
               modifyVars: {
-                'primary-color': '#346fff', // 全局主色
-                'link-color': '#346fff', // 链接色
+                'primary-color': '#118EE9', // 全局主色
+                'link-color': '#118EE9', // 链接色
               },
             },
           },
