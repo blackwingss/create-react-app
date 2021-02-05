@@ -849,7 +849,7 @@ module.exports = function (webpackEnv) {
       isEnvProduction &&
         isGzip &&
         new CompressionPlugin({
-          filename: '[path].gz[query]',
+          filename: '[name].gz[query]',
           algorithm: 'gzip',
           test: /\.js$|\.css$/,
           threshold: 10240,
